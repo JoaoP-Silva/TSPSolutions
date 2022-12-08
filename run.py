@@ -5,8 +5,8 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.abspath(__file__), os.pardir))
 sys.path.append(("%s/src")%(ROOT))
 
-from genInput import * 
-
+from genInput import genTspInput
+from TSP import bnbTSP
 if __name__ == '__main__':
 
     seed = -1
@@ -31,7 +31,9 @@ if __name__ == '__main__':
             print("Enter the value of i > 1 to define the input size 2^i")
             i = int(input())
         size = 2**i
-        genTspInput(size, seed)
+        euclideanG, manhattanG = genTspInput(size, seed)
+        print(bnbTSP(euclideanG, "teste"))
+
 
     elif(btn == 2):
         for i in range(4, 11):

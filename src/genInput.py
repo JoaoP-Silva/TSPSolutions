@@ -13,7 +13,6 @@ def genTspInput(numNodes, seed):
     manhattanG = nx.Graph()
     euclideanG = nx.Graph()
     nodeKey = 0
-
     for n in nodes:
         G.add_node(nodeKey, pos=(n[0], n[1]))
         manhattanG.add_node(nodeKey, pos=(n[0], n[1]))
