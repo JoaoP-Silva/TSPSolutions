@@ -42,7 +42,7 @@ def writeMetics(metrics):
         f = open(("%s/results/result_%s_%d.csv")%(ROOT, model, seed), 'w')
         f.write("algorithm, i, path_len, time, curr_mem, peak_mem, distance_funct, seed\n")
     else:
-        f = open(("%s/results/result_%d_%s_%d.csv")%(ROOT, i, model, seed), 'a')
+        f = open(("%s/results/result_%s_%d.csv")%(ROOT, model, seed), 'a')
 
     data = (("%d, %d, %f, %f, %f, %f, %s, %d\n") % 
             (algorithm, i, path_len, time, curr_mem, peak_mem, distance_funct, seed))
