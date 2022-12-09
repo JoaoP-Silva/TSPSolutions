@@ -8,7 +8,7 @@ sys.path.append(("%s/src")%(ROOT))
 
 from genInput import genTspInput
 from bnbTsp import bnbTSP
-from aproxTsp import twiceAroundTreeTsp
+from aproxTsp import *
 import time
 
 def writeGraph(G, size, seed, model):
@@ -53,7 +53,7 @@ def writeMetics(metrics):
 # Input model: python run.py < algorithm > < i > < seed > < function >
 # <algorithm> can be "bnb" to use branch and bound algorithm to solve TSP
 # instance ou "aprox" to solve the TSP using the algorithms Twice around the tree
-# and Christofides
+# and Christofides.
 # <i> is an integer according to the experiment input size 2^i.
 # <seed> is an integer to be the random seed.
 # <function> can be "man" (for manhattan distance)
@@ -127,6 +127,16 @@ if __name__ == '__main__':
                 metrics = [alg, i, pathLen, execTime, current, peak, "euc", seed]
                 writeMetics(metrics)
                 writePath(path, pathLen,i, alg, seed, "euc")
+
+                tracemalloc.clear_traces()
+                start_time = time.time()
+                path, pathLen = christofidesTsp(euclideanG)
+                alg = 2
+                current, peak = tracemalloc.get_traced_memory()
+                execTime = time.time() - start_time
+                metrics = [alg, i, pathLen, execTime, current, peak, "euc", seed]
+                writeMetics(metrics)
+                writePath(path, pathLen,i, alg, seed, "euc")
             
             elif(model == "man"):
                 writeGraph(manhattanG, i, seed, "man")
@@ -134,6 +144,17 @@ if __name__ == '__main__':
                 tracemalloc.start()
                 path, pathLen = twiceAroundTreeTsp(manhattanG)
                 alg = 1
+                current, peak = tracemalloc.get_traced_memory()
+                execTime = time.time() - start_time
+                metrics = [alg, i, pathLen, execTime, current, peak, "man", seed]
+                writeMetics(metrics)
+                writePath(path, pathLen,i, alg, seed, "man")
+
+                tracemalloc.clear_traces()
+                start_time = time.time()
+                tracemalloc.start()
+                path, pathLen = christofidesTsp(manhattanG)
+                alg = 2
                 current, peak = tracemalloc.get_traced_memory()
                 execTime = time.time() - start_time
                 metrics = [alg, i, pathLen, execTime, current, peak, "man", seed]
