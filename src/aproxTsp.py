@@ -30,7 +30,6 @@ def christofidesTsp(G):
     matchEdges = nx.min_weight_matching(subGraph)
     for edge in matchEdges:
         if(not T.has_edge(*edge)):
-            print("Entrou!")
             T.add_edge(*edge)
 
     path = list(nx.dfs_preorder_nodes(T, source=0))
