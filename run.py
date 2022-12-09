@@ -8,6 +8,7 @@ sys.path.append(("%s/src")%(ROOT))
 
 from genInput import genTspInput
 from bnbTsp import bnbTSP
+from aproxTsp import twiceAroundTreeTsp
 import time
 
 def writeGraph(G, size, seed, model):
@@ -36,9 +37,9 @@ def writeMetics(metrics):
     distance_funct = metrics[6]
     seed = metrics[7]
 
-    isExist = os.path.exists(("%s/results/result_%d_%s_%d.csv")%(ROOT, i, model, seed))
+    isExist = os.path.exists(("%s/results/result_%s_%d.csv")%(ROOT, model, seed))
     if(not isExist):
-        f = open(("%s/results/result_%d_%s_%d.csv")%(ROOT, i, model, seed), 'w')
+        f = open(("%s/results/result_%s_%d.csv")%(ROOT, model, seed), 'w')
         f.write("algorithm, i, path_len, time, curr_mem, peak_mem, distance_funct, seed\n")
     else:
         f = open(("%s/results/result_%d_%s_%d.csv")%(ROOT, i, model, seed), 'a')
@@ -49,22 +50,30 @@ def writeMetics(metrics):
     f.close
         
 
-# Input model: python run.py < i > < seed > < function >
+# Input model: python run.py < algorithm > < i > < seed > < function >
+# <algorithm> can be "bnb" to use branch and bound algorithm to solve TSP
+# instance ou "aprox" to solve the TSP using the algorithms Twice around the tree
+# and Christofides
 # <i> is an integer according to the experiment input size 2^i.
 # <seed> is an integer to be the random seed.
 # <function> can be "man" (for manhattan distance)
 # or "euc" (for euclidean distance).
+#
+#
+# On output branch and bound is algorithm 0, twice around the tree is 1
+# and Christofides is 2
 if __name__ == '__main__':
 
 
-    i = int(sys.argv[1])
-    seed = int(sys.argv[2])
-    model = str(sys.argv[3])
+    algorithm = str(sys.argv[1])
+    i = int(sys.argv[2])
+    seed = int(sys.argv[3])
+    model = str(sys.argv[4])
 
-    if(len(sys.argv) < 4):
+    if(len(sys.argv) < 5):
         print("Too few arguments for run.py")
     
-    elif(len(sys.argv) > 4):
+    elif(len(sys.argv) > 5):
         print("Too many arguments for run.py")
 
     elif(i <= 0):
@@ -74,32 +83,59 @@ if __name__ == '__main__':
         print("seed must be at least 0")
     
     elif(model != "euc" and model != "man"):
-        print("Wrong model")
+        print("Unknown model")
     
+    elif(algorithm != "aprox" and algorithm != "bnb"):
+        print("Unknown algorithm")
     else:
         size = 2**i
         euclideanG, manhattanG = genTspInput(size, seed)
-          
-        if(model == "euc"):
-            writeGraph(euclideanG, i, seed, "euc")
-            start_time = time.time()
-            tracemalloc.start()
-            path, pathLen = bnbTSP(euclideanG)
-            alg = 0
-            current, peak = tracemalloc.get_traced_memory()
-            execTime = time.time() - start_time
-            metrics = [alg, i, pathLen, execTime, current, peak, "euc", seed]
-            writeMetics(metrics)
-            writePath(path, pathLen,i, alg, seed, "euc")
-        
-        elif(model == "man"):
-            writeGraph(manhattanG, i, seed, "man")
-            start_time = time.time()
-            tracemalloc.start()
-            path, pathLen = bnbTSP(manhattanG)
-            alg = 0
-            current, peak = tracemalloc.get_traced_memory()
-            execTime = time.time() - start_time
-            metrics = [alg, i, pathLen, execTime, current, peak, "man", seed]
-            writeMetics(metrics)
-            writePath(path, pathLen,i, alg, seed, "man")
+        if(algorithm == "bnb"):
+            if(model == "euc"):
+                writeGraph(euclideanG, i, seed, "euc")
+                start_time = time.time()
+                tracemalloc.start()
+                path, pathLen = bnbTSP(euclideanG)
+                alg = 0
+                current, peak = tracemalloc.get_traced_memory()
+                execTime = time.time() - start_time
+                metrics = [alg, i, pathLen, execTime, current, peak, "euc", seed]
+                writeMetics(metrics)
+                writePath(path, pathLen,i, alg, seed, "euc")
+            
+            elif(model == "man"):
+                writeGraph(manhattanG, i, seed, "man")
+                start_time = time.time()
+                tracemalloc.start()
+                path, pathLen = bnbTSP(manhattanG)
+                alg = 0
+                current, peak = tracemalloc.get_traced_memory()
+                execTime = time.time() - start_time
+                metrics = [alg, i, pathLen, execTime, current, peak, "man", seed]
+                writeMetics(metrics)
+                writePath(path, pathLen,i, alg, seed, "man")
+
+        else:
+            if(model == "euc"):
+                writeGraph(euclideanG, i, seed, "euc")
+                start_time = time.time()
+                tracemalloc.start()
+                path, pathLen = twiceAroundTreeTsp(euclideanG)
+                alg = 1
+                current, peak = tracemalloc.get_traced_memory()
+                execTime = time.time() - start_time
+                metrics = [alg, i, pathLen, execTime, current, peak, "euc", seed]
+                writeMetics(metrics)
+                writePath(path, pathLen,i, alg, seed, "euc")
+            
+            elif(model == "man"):
+                writeGraph(manhattanG, i, seed, "man")
+                start_time = time.time()
+                tracemalloc.start()
+                path, pathLen = twiceAroundTreeTsp(manhattanG)
+                alg = 1
+                current, peak = tracemalloc.get_traced_memory()
+                execTime = time.time() - start_time
+                metrics = [alg, i, pathLen, execTime, current, peak, "man", seed]
+                writeMetics(metrics)
+                writePath(path, pathLen,i, alg, seed, "man")
