@@ -64,19 +64,21 @@ def writeMetics(metrics):
 # and Christofides is 2
 if __name__ == '__main__':
 
-
-    algorithm = str(sys.argv[1])
-    i = int(sys.argv[2])
-    seed = int(sys.argv[3])
-    model = str(sys.argv[4])
-
+    
     if(len(sys.argv) < 5):
         print("Too few arguments for run.py")
     
     elif(len(sys.argv) > 5):
         print("Too many arguments for run.py")
 
-    elif(i <= 0):
+    algorithm = str(sys.argv[1])
+    i = int(sys.argv[2])
+    seed = int(sys.argv[3])
+    model = str(sys.argv[4])
+
+    
+
+    if(i <= 0):
         print("i must be greater than 0")
 
     elif(seed < 0):

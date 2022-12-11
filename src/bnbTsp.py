@@ -37,7 +37,7 @@ def bnbTSP(graph):
         pathCpy = path.copy()
         pathCpy.append(neighbor)
         currPathVal = graph[0][neighbor]['weight']
-        val = bound(visitedCpy, pathCpy, currPathVal, initialEstimate, graph)
+        val = bound(pathCpy, initialEstimate, graph)
         newBnbNode = bnbNode(val, level, visitedCpy, pathCpy, currPathVal)
         heapq.heappush(queue, newBnbNode)   
 
@@ -48,8 +48,8 @@ def bnbTSP(graph):
         thisNode = heapq.heappop(queue)
         lastNode = thisNode.sol[-1]
         if(thisNode.level > n):
-            if thisNode.cost < best:
-                best = thisNode.cost
+            if (thisNode.solVal < best):
+                best = thisNode.solVal
                 sol = thisNode.sol
         elif(thisNode.cost < best):
             if (thisNode.level < n):
@@ -62,7 +62,7 @@ def bnbTSP(graph):
                         currPathVal = thisNode.solVal
                         currPathVal += graph[lastNode][neighbor]['weight']
                         thisLevel = thisNode.level + 1
-                        val = bound(visitedCpy, pathCpy, currPathVal, initialEstimate, graph)
+                        val = bound(pathCpy, initialEstimate, graph)
                         if(val < best):
                             newBnbNode = bnbNode(val, thisLevel, visitedCpy, pathCpy, currPathVal)
                             heapq.heappush(queue, newBnbNode)
@@ -72,7 +72,7 @@ def bnbTSP(graph):
                 pathCpy.append(0)
                 currPathVal = thisNode.solVal
                 currPathVal += graph[lastNode][0]['weight']
-                val = bound(thisNode.visited, pathCpy, currPathVal, initialEstimate, graph)
+                val = currPathVal
                 if(val < best):
                     newBnbNode = bnbNode(val, thisNode.level + 1, thisNode.visited, pathCpy, currPathVal)
                     heapq.heappush(queue, newBnbNode)
@@ -84,27 +84,27 @@ def bnbTSP(graph):
 
 
 
-def bound(visitedNodes, currPath, currPathVal, initialEstimate, G):
+def bound(currPath, initialEstimate, G):
 
-    #Consider the value of current path
-    val = currPathVal
+    estimate = initialEstimate.copy()
 
-    #Sum the other edge from last added node
-    u = currPath[-1]
-    v = currPath[-2]
-    edgeVal = G[u][v]['weight']
-    if(edgeVal != initialEstimate[u][1]):
-        val += initialEstimate[u][0]
-    else:
-        val += initialEstimate[u][1]
-    
+    for i in range(len(currPath) - 1):
+        #Sum the other edge from last added node
+        u = currPath[i]
+        v = currPath[i + 1]
+        edgeVal = G[u][v]['weight']
+        if(edgeVal != initialEstimate[u][0]):
+            estimate[u][1] = edgeVal
+        if(edgeVal != initialEstimate[v][0]):
+            estimate[v][1] = edgeVal
+        
+    val = 0
     #Sum all selected edges from other nodes
-    for node in G:
-        if(node not in visitedNodes):
-            for i in range(0, 2):
-                val += initialEstimate[node][i]
+    for i in range(G.number_of_nodes()):
+        for j in range(0, 2):
+            val += estimate[i][j]
     
-    return val
+    return val/2
 
 #Returns the initialEstimate matrix
 def initialBound(G):
