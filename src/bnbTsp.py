@@ -47,11 +47,7 @@ def bnbTSP(graph):
     while(len(queue) > 0):
         thisNode = heapq.heappop(queue)
         lastNode = thisNode.sol[-1]
-        if(thisNode.level > n):
-            if (thisNode.solVal < best):
-                best = thisNode.solVal
-                sol = thisNode.sol
-        elif(thisNode.cost < best):
+        if(thisNode.cost < best):
             if (thisNode.level < n):
                 for neighbor in graph[lastNode]:
                     if(neighbor not in thisNode.visited):
@@ -74,8 +70,8 @@ def bnbTSP(graph):
                 currPathVal += graph[lastNode][0]['weight']
                 val = currPathVal
                 if(val < best):
-                    newBnbNode = bnbNode(val, thisNode.level + 1, thisNode.visited, pathCpy, currPathVal)
-                    heapq.heappush(queue, newBnbNode)
+                    best = val
+                    sol = pathCpy
 
     return sol, best
 
@@ -86,8 +82,7 @@ def bnbTSP(graph):
 
 def bound(currPath, initialEstimate, G):
 
-    estimate = initialEstimate.copy()
-
+    estimate = np.copy(initialEstimate)
     for i in range(len(currPath) - 1):
         #Sum the other edge from last added node
         u = currPath[i]
@@ -100,16 +95,14 @@ def bound(currPath, initialEstimate, G):
         
     val = 0
     #Sum all selected edges from other nodes
-    for i in range(G.number_of_nodes()):
-        for j in range(0, 2):
-            val += estimate[i][j]
+    val = np.sum(estimate)
     
-    return val/2
+    return math.ceil(val/2)
 
 #Returns the initialEstimate matrix
 def initialBound(G):
     i = 0
-    initialEstimate = mat = [[0 for _ in range(2)] for _ in range(G.number_of_nodes())]
+    initialEstimate = np.zeros((G.number_of_nodes(), 2))
     for node in G:
         edges = []
         for neighbor in G[node]:
